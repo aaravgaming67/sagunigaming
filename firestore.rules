@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /saguniBookings/{bookingId} {
+      allow create: if isValidBooking();
+      allow read, update, delete: if false;
+    }
+  }
+}
+
+function isValidBooking() {
+  return request.resource.data.keys().hasOnly([
+    "code",
+    "name",
+    "phone",
+    "setup",
+    "game",
+    "date",
+    "time",
+    "hours",
+    "players",
+    "notes",
+    "estimate",
+    "synced",
+    "createdAt",
+    "firebaseCreatedAt"
+  ])
+  && request.resource.data.name is string
+  && request.resource.data.name.size() >= 2
+  && request.resource.data.name.size() <= 80
+  && request.resource.data.phone is string
+  && request.resource.data.phone.size() >= 8
+  && request.resource.data.phone.size() <= 16
+  && request.resource.data.setup in ["Gaming PC", "PS5 Bay", "Squad Block"]
+  && request.resource.data.game is string
+  && request.resource.data.date is string
+  && request.resource.data.time is string
+  && request.resource.data.hours is int
+  && request.resource.data.hours >= 1
+  && request.resource.data.hours <= 8
+  && request.resource.data.players is int
+  && request.resource.data.players >= 1
+  && request.resource.data.players <= 8
+  && request.resource.data.estimate is int
+  && request.resource.data.estimate >= 100
+  && request.resource.data.estimate <= 10000;
+}
